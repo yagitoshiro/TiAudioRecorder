@@ -27,102 +27,102 @@ import android.os.Environment;
 public class TiaudiorecorderModule extends KrollModule
 {
 
-	// Standard Debugging variables
-	private static final String LCAT = "TiaudiorecorderModule";
-	private static final boolean DBG = TiConfig.LOGD;
-	
-	final MediaRecorder recorder = new MediaRecorder();
-	public String path;
+  // Standard Debugging variables
+  private static final String LCAT = "TiaudiorecorderModule";
+  private static final boolean DBG = TiConfig.LOGD;
+  
+  final MediaRecorder recorder = new MediaRecorder();
+  public String path;
 
-	// You can define constants with @Kroll.constant, for example:
-	// @Kroll.constant public static final String EXTERNAL_NAME = value;
-	
-	public TiaudiorecorderModule()
-	{
-		super();
-	}
+  // You can define constants with @Kroll.constant, for example:
+  // @Kroll.constant public static final String EXTERNAL_NAME = value;
+  
+  public TiaudiorecorderModule()
+  {
+    super();
+  }
 
-	@Kroll.onAppCreate
-	public static void onAppCreate(TiApplication app)
-	{
-		Log.d(LCAT, "inside onAppCreate");
-		// put module init code that needs to run when the application is created
-	}
+  @Kroll.onAppCreate
+  public static void onAppCreate(TiApplication app)
+  {
+    Log.d(LCAT, "inside onAppCreate");
+    // put module init code that needs to run when the application is created
+  }
 
-	// Methods
-	@Kroll.method
-	public String example()
-	{
-		Log.d(LCAT, "example called");
-		return "hello world";
-	}
-	
-	// Properties
-	@Kroll.getProperty
-	public String getExampleProp()
-	{
-		Log.d(LCAT, "get example property");
-		return "hello world";
-	}
-	
-	
-	@Kroll.setProperty
-	public void setExampleProp(String value) {
-		Log.d(LCAT, "set example property: " + value);
-	}
-	
-	private String sanitizePath(String filename) {
+  // Methods
+  @Kroll.method
+  public String example()
+  {
+    Log.d(LCAT, "example called");
+    return "hello world";
+  }
+  
+  // Properties
+  @Kroll.getProperty
+  public String getExampleProp()
+  {
+    Log.d(LCAT, "get example property");
+    return "hello world";
+  }
+  
+  
+  @Kroll.setProperty
+  public void setExampleProp(String value) {
+    Log.d(LCAT, "set example property: " + value);
+  }
+  
+  private String sanitizePath(String filename) {
     Log.d(LCAT, "filename:" + filename);
     Pattern pattern = Pattern.compile("(file|content):/");
     Matcher matcher = pattern.matcher(filename);
     filename = matcher.replaceFirst("");
-		if (!filename.startsWith("/")) {
-			filename = "/" + filename;
+    if (!filename.startsWith("/")) {
+      filename = "/" + filename;
     }
-		if (!filename.endsWith(".3gp")) {
-			filename += ".3gp";
-		}
+    if (!filename.endsWith(".3gp")) {
+      filename += ".3gp";
+    }
     Log.d(LCAT, "filename:" + filename);
     //this.path = "/data/data/"+ TiApplication.getInstance().getPackageName() +"/app_appdata/" + filename;
     //this.path = Environment.getExternalStorageDirectory() + "/" +  TiApplication.getInstance().getPackageName() + filename;
     return filename;
-	}
-	
-	@Kroll.method
-	public String setPath(String path){
-		this.path = sanitizePath(path);
+  }
+  
+  @Kroll.method
+  public String setPath(String path){
+    this.path = sanitizePath(path);
     return this.path;
-	}
-	
-	@Kroll.method
-	public void start() throws IOException {
-		String state = android.os.Environment.getExternalStorageState();
-	  if(!state.equals(android.os.Environment.MEDIA_MOUNTED))  {
-	      throw new IOException("Please check out your SD Card. The status is " + state + ".");
-	  }
+  }
+  
+  @Kroll.method
+  public void start() throws IOException {
+    String state = android.os.Environment.getExternalStorageState();
+    if(!state.equals(android.os.Environment.MEDIA_MOUNTED))  {
+        throw new IOException("Please check out your SD Card. The status is " + state + ".");
+    }
 
-	  File directory = new File(path).getParentFile();
-	  if (!directory.exists() && !directory.mkdirs()) {
-	    throw new IOException("Failed to create file " + this.path);
-	  }
+    File directory = new File(path).getParentFile();
+    if (!directory.exists() && !directory.mkdirs()) {
+      throw new IOException("Failed to create file " + this.path);
+    }
 
-	  recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-	  recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-	  recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-	  recorder.setOutputFile(path);
-	  recorder.prepare();
-	  recorder.start();
-	}
-	
-	@Kroll.method
-	public void stop() throws IOException {
-		recorder.stop();
-	    recorder.release();
-	}
-	
-	@Kroll.method
-	public void pause(){
-		
-	}
+    recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+    recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+    recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+    recorder.setOutputFile(path);
+    recorder.prepare();
+    recorder.start();
+  }
+  
+  @Kroll.method
+  public void stop() throws IOException {
+    recorder.stop();
+      recorder.release();
+  }
+  
+  @Kroll.method
+  public void pause(){
+    
+  }
 }
 
