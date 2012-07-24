@@ -1,0 +1,18 @@
+#
+# this is your module manifest and used by Titanium
+# during compilation, packaging, distribution, etc.
+#
+version: 0.1
+apiversion: 2
+description: Audio Recorder for Android
+author: Toshiro Yagi
+license: http://opensource.org/licenses/mit-license.php
+copyright: Tosrhio Yagi
+
+
+# these should not be edited
+name: tiaudiorecorder
+moduleid: org.selfkleptomaniac.ti.mod.tiaudiorecorder
+guid: ac0e24c1-d2c2-4794-9a04-8385c9fa80b3
+platform: android
+minsdk: 2.0.2.GA
