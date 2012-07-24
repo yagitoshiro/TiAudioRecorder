@@ -12,31 +12,6 @@ var label = Ti.UI.createLabel();
 win.add(label);
 win.open();
 
-// TODO: write your module tests here
-var tiaudiorecorder = require('org.selfkleptomaniac.ti.mod.tiaudiorecorder');
-Ti.API.info("module is => " + tiaudiorecorder);
-
-label.text = tiaudiorecorder.example();
-
-Ti.API.info("module exampleProp is => " + tiaudiorecorder.exampleProp);
-tiaudiorecorder.exampleProp = "This is a test value";
-
-if (Ti.Platform.name == "android") {
-	var proxy = tiaudiorecorder.createExample({
-		message: "Creating an example Proxy",
-		backgroundColor: "red",
-		width: 100,
-		height: 100,
-		top: 100,
-		left: 150
-	});
-
-	proxy.printMessage("Hello world!");
-	proxy.message = "Hi world!.  It's me again.";
-	proxy.printMessage("Hello world!");
-	win.add(proxy);
-}
-
 var tiaudiorecorder = null;
 var audio_file = Ti.Filesystem.getFile(Ti.Filesystem.externalStorageDirectory + 'test.3gp');
   
