@@ -1,7 +1,7 @@
 TiAudioRecorder
 ===========================================
 
-Titanium Mobile module for Android. You can record audio data with this module. Don't be eveil.
+Titanium Mobile module for Android. You can record audio data with this module. Don't be evil.
 
 USAGE
 ---------------------
