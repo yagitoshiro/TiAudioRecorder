@@ -10,6 +10,7 @@ package org.selfkleptomaniac.ti.mod.tiaudiorecorder;
 
 import org.appcelerator.kroll.KrollModule;
 import org.appcelerator.kroll.annotations.Kroll;
+import org.appcelerator.kroll.KrollDict;
 
 import org.appcelerator.titanium.TiApplication;
 import org.appcelerator.kroll.common.Log;
@@ -33,6 +34,7 @@ public class TiaudiorecorderModule extends KrollModule
   
   final MediaRecorder recorder = new MediaRecorder();
   public String path;
+  public String loadState;
 
   // You can define constants with @Kroll.constant, for example:
   // @Kroll.constant public static final String EXTERNAL_NAME = value;
@@ -73,7 +75,7 @@ public class TiaudiorecorderModule extends KrollModule
   }
   
   @Kroll.method
-  public void start() throws IOException {
+  public void prepare() throws IOException {
     String state = android.os.Environment.getExternalStorageState();
     if(!state.equals(android.os.Environment.MEDIA_MOUNTED))  {
         throw new IOException("Please check out your SD Card. The status is " + state + ".");
@@ -89,18 +91,59 @@ public class TiaudiorecorderModule extends KrollModule
     recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
     recorder.setOutputFile(path);
     recorder.prepare();
-    recorder.start();
+    this.loadState = "initialized";
+    KrollDict args = new KrollDict();
+    args.put("status", "initialized");
+    fireEvent("initialized", args);
   }
-  
+
+  @Kroll.method
+  public void start(){
+    if(this.loadState != "recording"){
+      recorder.start();
+      this.loadState = "recording";
+      KrollDict args = new KrollDict();
+      args.put("status", "recording");
+      args.put("path", this.path);
+      fireEvent("start", args);
+    }else{
+      Log.d(LCAT, "start() function is called, but loadState is " + this.loadState);
+    }
+  }
+
   @Kroll.method
   public void stop() throws IOException {
-    recorder.stop();
+    if(this.loadState == "recording"){
+      recorder.stop();
       recorder.release();
+      this.loadState = "complete";
+      KrollDict args = new KrollDict();
+      args.put("status", "complete");
+      args.put("path", this.path);
+      fireEvent("complete", args);
+    }else{
+      Log.d(LCAT, "stop() function is called, but loadState is " + this.loadState);
+    }
   }
   
   @Kroll.method
   public void pause(){
-    
+    if(this.loadState == "recording"){
+      recorder.stop();
+      recorder.reset();
+      this.loadState = "paused";
+      KrollDict args = new KrollDict();
+      args.put("status", "paused");
+      args.put("path", this.path);
+      fireEvent("paused", args);
+    }else{
+      Log.d(LCAT, "pause() function is called, but loadState is " + this.loadState);
+    }
+  }
+
+  @Kroll.method
+  public String getLoadState(){
+    return this.loadState;
   }
 }
 
