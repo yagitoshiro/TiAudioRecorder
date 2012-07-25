@@ -5,18 +5,15 @@
 
 
 // open a single window
-var window = Ti.UI.createWindow({
+var button = Ti.UI.createButton({title:'Start', width:200, height:200});
+var win = Ti.UI.createWindow({
 	backgroundColor:'white'
 });
-var button = Ti.UI.createButton({title:'Start', width:200, height:200});
-window.add(button);
-window.open();
-button.addEventListener('click', function(){
-  var win = Ti.UI.createWindow({
-  	backgroundColor:'white'
-  });
+
+function open_recorder(){
   var audio_file = Ti.Filesystem.getFile(Ti.Filesystem.externalStorageDirectory + 'test.3gp');
-  var tiaudiorecorder = require('org.selfkleptomaniac.ti.mod.tiaudiorecorder');
+  var tiaudiorecorder = null;
+  tiaudiorecorder = require('org.selfkleptomaniac.ti.mod.tiaudiorecorder');
 
   var b1 = Ti.UI.createButton({title:'Record', top:100, width:200,height:60,enabled:true});
   b1.addEventListener('click', function(){
@@ -63,7 +60,7 @@ button.addEventListener('click', function(){
       }else{
         tiaudiorecorder.reset();
       }
-      return
+      return;
     });
     dialog.show();
     win.add(dialog);
@@ -71,6 +68,13 @@ button.addEventListener('click', function(){
   tiaudiorecorder.addEventListener('complete', function(e){
     Ti.API.info('complete');
     Ti.API.info(JSON.stringify(e));
-    b3.enabled = true; });
+    b3.enabled = true;
+  });
+  tiaudiorecorder.addEventListener('error', function(e){
+    Ti.API.info('error');
+    Ti.API.info(JSON.stringify(e));
+    return;
+  });
   win.open();
-});
+}
+open_recorder();

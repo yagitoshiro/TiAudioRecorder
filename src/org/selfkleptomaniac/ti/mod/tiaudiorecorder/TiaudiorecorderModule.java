@@ -57,7 +57,7 @@ public class TiaudiorecorderModule extends KrollModule
 
   private String sanitizePath(String filename) {
     Log.d(LCAT, "filename:" + filename);
-    Pattern pattern = Pattern.compile("(file|content):/");
+    Pattern pattern = Pattern.compile("((file|content)://)");
     Matcher matcher = pattern.matcher(filename);
     filename = matcher.replaceFirst("");
     if (!filename.startsWith("/")) {
@@ -87,8 +87,7 @@ public class TiaudiorecorderModule extends KrollModule
   }
   
   @Kroll.method
-  public void prepare(String path) {
-    setPath(path);
+  public void prepare() {
     setRecorder();
 
     String state = android.os.Environment.getExternalStorageState();
@@ -97,7 +96,7 @@ public class TiaudiorecorderModule extends KrollModule
         raiseError("Please check out your SD Card. The status is " + state + ".");
     }else{
 
-      File directory = new File(path).getParentFile();
+      File directory = new File(this.path).getParentFile();
       if (!directory.exists() && !directory.mkdirs()) {
 //        throw new IOException("Failed to create file " + this.path);
           raiseError("Failed to create file " + this.path);
