@@ -87,29 +87,36 @@ public class TiaudiorecorderModule extends KrollModule
   }
   
   @Kroll.method
-  public void prepare() throws IOException {
-
+  public void prepare(String path) {
+    setPath(path);
     setRecorder();
 
     String state = android.os.Environment.getExternalStorageState();
     if(!state.equals(android.os.Environment.MEDIA_MOUNTED))  {
-        throw new IOException("Please check out your SD Card. The status is " + state + ".");
-    }
+        //throw new IOException("Please check out your SD Card. The status is " + state + ".");
+        raiseError("Please check out your SD Card. The status is " + state + ".");
+    }else{
 
-    File directory = new File(path).getParentFile();
-    if (!directory.exists() && !directory.mkdirs()) {
-      throw new IOException("Failed to create file " + this.path);
+      File directory = new File(path).getParentFile();
+      if (!directory.exists() && !directory.mkdirs()) {
+//        throw new IOException("Failed to create file " + this.path);
+          raiseError("Failed to create file " + this.path);
+      }else{
+        try{
+          this.recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+          this.recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+          this.recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+          this.recorder.setOutputFile(path);
+          this.recorder.prepare();
+          this.loadState = "initialized";
+          KrollDict args = new KrollDict();
+          args.put("status", "initialized");
+          fireEvent("initialized", args);
+        }catch(IOException e){
+          raiseError("Failed to get MediaRecorder ready.");
+        }
+      }
     }
-
-    this.recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-    this.recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-    this.recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-    this.recorder.setOutputFile(path);
-    this.recorder.prepare();
-    this.loadState = "initialized";
-    KrollDict args = new KrollDict();
-    args.put("status", "initialized");
-    fireEvent("initialized", args);
   }
 
   @Kroll.method
@@ -127,7 +134,7 @@ public class TiaudiorecorderModule extends KrollModule
   }
 
   @Kroll.method
-  public void stop() throws IOException {
+  public void stop() {
     if(this.loadState == "recording"){
       this.loadState = "complete";
       this.recorder.stop();
