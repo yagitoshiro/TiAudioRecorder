@@ -32,7 +32,7 @@ public class TiaudiorecorderModule extends KrollModule
   private static final String LCAT = "TiaudiorecorderModule";
   private static final boolean DBG = TiConfig.LOGD;
   
-  final MediaRecorder recorder = new MediaRecorder();
+  private MediaRecorder recorder;
   public String path;
   public String loadState;
 
@@ -51,6 +51,10 @@ public class TiaudiorecorderModule extends KrollModule
     // put module init code that needs to run when the application is created
   }
 
+  private void setRecorder(){
+    this.recorder = new MediaRecorder();
+  }
+
   private String sanitizePath(String filename) {
     Log.d(LCAT, "filename:" + filename);
     Pattern pattern = Pattern.compile("(file|content):/");
@@ -67,6 +71,14 @@ public class TiaudiorecorderModule extends KrollModule
     //this.path = Environment.getExternalStorageDirectory() + "/" +  TiApplication.getInstance().getPackageName() + filename;
     return filename;
   }
+
+  private void raiseError(String message){
+    this.loadState = "error";
+    KrollDict args = new KrollDict();
+    args.put("status", "error");
+    args.put("message", message);
+    fireEvent("error", args);
+  }
   
   @Kroll.method
   public String setPath(String path){
@@ -76,6 +88,9 @@ public class TiaudiorecorderModule extends KrollModule
   
   @Kroll.method
   public void prepare() throws IOException {
+
+    setRecorder();
+
     String state = android.os.Environment.getExternalStorageState();
     if(!state.equals(android.os.Environment.MEDIA_MOUNTED))  {
         throw new IOException("Please check out your SD Card. The status is " + state + ".");
@@ -86,11 +101,11 @@ public class TiaudiorecorderModule extends KrollModule
       throw new IOException("Failed to create file " + this.path);
     }
 
-    recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-    recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-    recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-    recorder.setOutputFile(path);
-    recorder.prepare();
+    this.recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+    this.recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+    this.recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+    this.recorder.setOutputFile(path);
+    this.recorder.prepare();
     this.loadState = "initialized";
     KrollDict args = new KrollDict();
     args.put("status", "initialized");
@@ -100,7 +115,7 @@ public class TiaudiorecorderModule extends KrollModule
   @Kroll.method
   public void start(){
     if(this.loadState != "recording"){
-      recorder.start();
+      this.recorder.start();
       this.loadState = "recording";
       KrollDict args = new KrollDict();
       args.put("status", "recording");
@@ -114,9 +129,9 @@ public class TiaudiorecorderModule extends KrollModule
   @Kroll.method
   public void stop() throws IOException {
     if(this.loadState == "recording"){
-      recorder.stop();
-      recorder.release();
       this.loadState = "complete";
+      this.recorder.stop();
+      this.recorder.release();
       KrollDict args = new KrollDict();
       args.put("status", "complete");
       args.put("path", this.path);
@@ -129,8 +144,13 @@ public class TiaudiorecorderModule extends KrollModule
   @Kroll.method
   public void pause(){
     if(this.loadState == "recording"){
-      recorder.stop();
-      recorder.reset();
+      //recorder.stop();
+      this.recorder.reset();
+      //try{
+      //  prepare();
+      //}catch(IOException e){
+      //  raiseError("IOException");
+      //}
       this.loadState = "paused";
       KrollDict args = new KrollDict();
       args.put("status", "paused");
@@ -139,6 +159,14 @@ public class TiaudiorecorderModule extends KrollModule
     }else{
       Log.d(LCAT, "pause() function is called, but loadState is " + this.loadState);
     }
+  }
+
+  @Kroll.method
+  public void reset(){
+    if(this.loadState == "recording"){
+      this.recorder.stop();
+    }
+    this.recorder.reset();
   }
 
   @Kroll.method

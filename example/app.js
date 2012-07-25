@@ -5,38 +5,72 @@
 
 
 // open a single window
-var win = Ti.UI.createWindow({
+var window = Ti.UI.createWindow({
 	backgroundColor:'white'
 });
-var label = Ti.UI.createLabel();
-win.add(label);
-win.open();
-
-var tiaudiorecorder = null;
-var audio_file = Ti.Filesystem.getFile(Ti.Filesystem.externalStorageDirectory + 'test.3gp');
-  
-var button = Ti.UI.createButton({title:'Record', top:0, width:200,height:60});
+var button = Ti.UI.createButton({title:'Start', width:200, height:200});
+window.add(button);
+window.open();
 button.addEventListener('click', function(){
-  tiaudiorecorder = require('org.selfkleptomaniac.ti.mod.tiaudiorecorder');
-  tiaudiorecorder.start();
-  var new_file = tiaudiorecorder.setPath(audio_file.nativePath);
-});
-win.add(button);
-var b2 = Ti.UI.createButton({bottom:100,width:200, height:60,title:'STOP'});
-b2.addEventListener('click', function(){
-  tiaudiorecorder.stop();
-}); 
-win.add(b2);
-var b3 = Ti.UI.createButton({bottom:200, width:200, height:60, title:'Playback'});
-b3.addEventListener('click', function(){
-  var f2 = audio_file;
-  if(f2.exists()){
-    var player = Ti.Media.createSound({url:f2.nativePath});
-    player.setVolume(10.0);
-    player.play();
-  }else{
-    alert('not exists');
-  }
-});
-win.add(b3);
+  var win = Ti.UI.createWindow({
+  	backgroundColor:'white'
+  });
+  var audio_file = Ti.Filesystem.getFile(Ti.Filesystem.externalStorageDirectory + 'test.3gp');
+  var tiaudiorecorder = require('org.selfkleptomaniac.ti.mod.tiaudiorecorder');
 
+  var b1 = Ti.UI.createButton({title:'Record', top:100, width:200,height:60,enabled:true});
+  b1.addEventListener('click', function(){
+    Ti.API.info(tiaudiorecorder.getLoadState());
+    tiaudiorecorder.setPath(audio_file.nativePath);
+    tiaudiorecorder.prepare();
+  });
+  win.add(b1);
+  var b2 = Ti.UI.createButton({bottom:200,width:200, height:60,title:'STOP',enabled:false});
+  b2.addEventListener('click', function(){
+    tiaudiorecorder.stop();
+  }); 
+  win.add(b2);
+  var b3 = Ti.UI.createButton({bottom:300, width:200, height:60, title:'Playback', enabled:false});
+  b3.addEventListener('click', function(){
+    if(audio_file.exists()){
+      var player = Ti.Media.createSound({url:audio_file.nativePath});
+      player.setVolume(10.0);
+      player.play();
+    }else{
+      alert('file not exists');
+    }
+  });
+  win.add(b3);
+  
+  var b4 = Ti.UI.createButton({bottom:100, width:200, height:60, title:'Close', enabled:true});
+  b4.addEventListener('click', function(e){
+    tiaudiorecorder = null;
+    win.close();
+  });
+  win.add(b4);
+  
+  tiaudiorecorder.addEventListener('initialized', function(e){
+    Ti.API.info('initialized');
+    Ti.API.info(JSON.stringify(e));
+    record();
+  });
+  function record(){
+    var dialog = Ti.UI.createAlertDialog({title:'Audio Recorder', message:'OK, we are ready.', buttonNames:['Start', 'Cancel']});
+    dialog.addEventListener('click', function(e){
+      if(e.index == 0){
+        tiaudiorecorder.start();
+        b2.enabled = true;
+      }else{
+        tiaudiorecorder.reset();
+      }
+      return
+    });
+    dialog.show();
+    win.add(dialog);
+  }
+  tiaudiorecorder.addEventListener('complete', function(e){
+    Ti.API.info('complete');
+    Ti.API.info(JSON.stringify(e));
+    b3.enabled = true; });
+  win.open();
+});
