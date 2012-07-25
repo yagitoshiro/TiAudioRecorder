@@ -19,6 +19,8 @@ And add user-permission:
 	<uses-permission android:name="android.permission.RECORD_AUDIO"/>
 ```
 
+O.K. Now you can go as far as you can go. Build your app and run it.
+
 LICENSE
 ---------------------
 MIT License
