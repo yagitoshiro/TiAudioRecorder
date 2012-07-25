@@ -10,7 +10,7 @@ Don't forget to add permission. On building your app, don't run, walk nor crawl.
 
 ```
 $ mkdir -p ${PROJECT_HOME}/platfom/android
-$ cp ${PROJECT_HOME}/build/android/AndroidManifest.xml ${PROJECT_HOME}/platform/android
+$ cp ${PROJECT_HOME}/build/android/AndroidManifest.xml ${PROJECT_HOME}/platform/android/
 ```
 
 And add user-permission:
